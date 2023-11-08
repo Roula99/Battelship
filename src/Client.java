@@ -1,50 +1,42 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.Executors;
+import java.io.*;
+import java.net.*;
 
-class battelShipServer {
+public class Client {
+    public static void main(String[] args) {
+        try {
+            Socket socket = new Socket("localhost", 12345); // Anslut till servern
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
 
-
-
-    public static class BattleshipServer {
-        public static void main(String[] args) throws IOException {
-            ServerSocket serverSocket = new ServerSocket(12345); // Ange önskad port
+            String response;
+            String shot = Protocol.CLIENT_SHOT_FIRST; // Skjut första skottet
 
             while (true) {
-                Socket clientSocket = serverSocket.accept();
-                Executors.newFixedThreadPool(2).submit(new BattleshipGame(clientSocket));
+                out.println(shot); // Skicka skottet till servern
+
+                response = in.readLine(); // Ta emot svar från servern
+                System.out.println("Server: " + response);
+
+                if (response.equals(Protocol.GAME_OVER)) {
+                    System.out.println("Du förlorade. Spelet är över.");
+                    break;
+                } else if (response.startsWith(Protocol.SUNK)) {
+
+                } else {
+
+                }
             }
+
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
-    static class BattleshipGame implements Runnable {
-        private Socket clientSocket;
-        private PrintWriter out;
-        private BufferedReader in;
-
-        public BattleshipGame(Socket socket) {
-            this.clientSocket = socket;
-        }
-
-        @Override
-        public void run() {
-            try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-
-
-                out.println("Välkommen till Battleship!");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
 }
+
+
+
+
+
+
